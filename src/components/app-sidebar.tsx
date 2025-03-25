@@ -1,4 +1,4 @@
-import { Calendar, ChevronDown, Home, Inbox, Search, Settings } from "lucide-react"
+import {ChevronDown, Home, Inbox, Settings, FileText, User, GraduationCap } from "lucide-react"
 
 import {
     Sidebar,
@@ -16,45 +16,47 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import Logo from "./logo"
+import Link from "next/link"
 
 // Menu items.
 const starATestOptions = [
     {
         title: "WRA",
-        url: "#",
-        icon: Home,
+        url: "/wra",
+        icon: FileText,
     },
     {
         title: "SSCA Section 1",
         url: "#",
-        icon: Inbox,
+        icon: FileText,
     },
     {
         title: "SSCA Section 2",
         url: "#",
-        icon: Calendar,
+        icon: FileText,
     },
     {
         title: "SSCA Section 3",
         url: "#",
-        icon: Search,
+        icon: FileText,
     },
     {
         title: "SSCA Section 4",
         url: "#",
-        icon: Settings,
+        icon: FileText,
     },
 ]
 const addUserOptions = [
     {
         title: "Add Student",
         url: "#",
-        icon: Home,
+        icon: GraduationCap,
     },
     {
         title: "Add Tutor",
         url: "#",
-        icon: Inbox,
+        icon: User,
     },
 ]
 const trackOptions = [
@@ -71,15 +73,19 @@ const trackOptions = [
 ]
 
 export function AppSidebar() {
+
     return (
+        <>
         <Sidebar>
+            <Logo className="p-2 " />
             <SidebarContent>
             <SidebarGroup>
-                <SidebarGroupLabel>TR Logo</SidebarGroupLabel>
+                {/* <SidebarGroupLabel>
+                </SidebarGroupLabel> */}
                 <SidebarGroupContent className="space-y-1">
-                <Collapsible defaultOpen className="group/collapsible -mb-5">
+                <Collapsible defaultOpen className="group/collapsible -mb-2">
                     <SidebarGroup>
-                    <SidebarGroupLabel asChild>
+                    <SidebarGroupLabel asChild className="text-md">
                         <CollapsibleTrigger>
                         Start a Test
                         <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
@@ -103,9 +109,9 @@ export function AppSidebar() {
                     </CollapsibleContent>
                     </SidebarGroup>
                 </Collapsible>
-                <Collapsible defaultOpen className="group/collapsible -mb-5">
+                <Collapsible defaultOpen className="group/collapsible -mb-2">
                     <SidebarGroup>
-                    <SidebarGroupLabel asChild>
+                    <SidebarGroupLabel asChild className="text-md">
                         <CollapsibleTrigger>
                         Add Student / Tutor
                         <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
@@ -117,10 +123,10 @@ export function AppSidebar() {
                             {addUserOptions.map((item) => (
                             <SidebarMenuItem key={item.title}>
                                 <SidebarMenuButton asChild>
-                                <a href={item.url}>
+                                <Link href={item.url}>
                                     <item.icon className="mr-2 h-4 w-4" />
                                     <span>{item.title}</span>
-                                </a>
+                                </Link>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                             ))}
@@ -131,7 +137,7 @@ export function AppSidebar() {
                 </Collapsible>
                 <Collapsible defaultOpen className="group/collapsible">
                     <SidebarGroup>
-                    <SidebarGroupLabel asChild>
+                    <SidebarGroupLabel asChild className="text-md">
                         <CollapsibleTrigger>
                         Track Progress
                         <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
@@ -177,5 +183,7 @@ export function AppSidebar() {
             </SidebarGroup>
             </SidebarContent>
         </Sidebar>
+        </>
     )
 }
+
