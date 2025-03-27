@@ -23,7 +23,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog"
 import {
@@ -35,7 +34,6 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -58,7 +56,7 @@ const assessmentSchema = z.object({
 type Assessment = z.infer<typeof assessmentSchema>
 
 export default function TutorDashboard() {
-  const [selectedStudent, setSelectedStudent] = React.useState<string | null>(null)
+//   const [selectedStudent, setSelectedStudent] = React.useState<string | null>(null)
   const [isAssessmentOpen, setIsAssessmentOpen] = React.useState(false)
   const [assessmentType, setAssessmentType] = React.useState<string>('')
 

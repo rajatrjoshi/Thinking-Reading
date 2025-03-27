@@ -49,7 +49,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
-import { MoreHorizontal, ChevronRight, Trash, Edit, UserCog } from "lucide-react"
+import { MoreHorizontal, Trash, Edit, UserCog } from "lucide-react"
 
 const tutorFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -61,7 +61,8 @@ const tutorFormSchema = z.object({
 })
 
 export default function AdminDashboard() {
-  const [schools, setSchools] = React.useState([
+//   const [schools, setSchools] = React.useState([
+  const [schools] = React.useState([
     {
       id: 1,
       name: 'St Francis',
@@ -72,7 +73,8 @@ export default function AdminDashboard() {
       status: 'active'
     }
   ])
-  const [students, setStudents] = React.useState([]);
+//   const [students, setStudents] = React.useState([]);
+  const [setStudents] = React.useState([]);
   const [tutors, setTutors] = React.useState([])
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState(null)
@@ -105,15 +107,15 @@ export default function AdminDashboard() {
   }
 
   // Add form handling functions
-  const handleAddSchool = async (formData) => {
-    // Implement school addition logic
-    console.log('Adding school:', formData)
-  }
+//   const handleAddSchool = async (formData) => {
+//     // Implement school addition logic
+//     console.log('Adding school:', formData)
+//   }
 
-  const handleTutorAssignment = async (data) => {
-    // Implement tutor assignment logic
-    console.log('Assigning tutor:', data)
-  }
+//   const handleTutorAssignment = async (data) => {
+//     // Implement tutor assignment logic
+//     console.log('Assigning tutor:', data)
+//   }
 
   // Add these functions inside your AdminDashboard component
   const navigateToSchool = (schoolId: string) => {
