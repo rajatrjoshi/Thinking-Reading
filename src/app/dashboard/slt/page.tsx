@@ -48,10 +48,10 @@ import {
 export default function SLTDashboard() {
   const [selectedTutor, setSelectedTutor] = React.useState("all")
   const [selectedGrade, setSelectedGrade] = React.useState("all")
-  const [dateRange, setDateRange] = React.useState({
-    from: new Date(),
-    to: new Date()
-  })
+//   const [dateRange, setDateRange] = React.useState({
+//     from: new Date(),
+//     to: new Date()
+//   })
   
   // Mock data for charts
   const performanceData = [
@@ -61,20 +61,20 @@ export default function SLTDashboard() {
     // Add more data points
   ]
 
-  const handleTutorClick = (tutorId: string) => {
-    // Implement tutor details view
-    console.log('Viewing tutor:', tutorId)
-  }
+//   const handleTutorClick = (tutorId: string) => {
+//     // Implement tutor details view
+//     console.log('Viewing tutor:', tutorId)
+//   }
 
-  const handleStudentClick = (studentId: string) => {
-    // Implement student details view
-    console.log('Viewing student:', studentId)
-  }
+//   const handleStudentClick = (studentId: string) => {
+//     // Implement student details view
+//     console.log('Viewing student:', studentId)
+//   }
 
-  const handleAddStaff = () => {
-    // Implement staff addition logic
-    console.log('Adding new staff member')
-  }
+//   const handleAddStaff = () => {
+//     // Implement staff addition logic
+//     console.log('Adding new staff member')
+//   }
 
   return (
     <main className="p-6 space-y-6">
@@ -267,7 +267,7 @@ export default function SLTDashboard() {
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell className="font-medium">St. Mary's School</TableCell>
+                      <TableCell className="font-medium">St. Mary&apos;s School</TableCell>
                       <TableCell>96</TableCell>
                       <TableCell>82%</TableCell>
                       <TableCell>6</TableCell>
