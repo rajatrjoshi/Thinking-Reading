@@ -74,15 +74,21 @@ export default function AdminDashboard() {
     }
   ])
 //   const [students, setStudents] = React.useState([]);
-  const [setStudents] = React.useState([]);
-  const [tutors, setTutors] = React.useState([])
+  const [students, setStudents] = React.useState([]);
+  interface Tutor {
+    id: number;
+    name: string;
+  }
+  const [tutors, setTutors] = React.useState<Tutor[]>([])
   const [loading, setLoading] = React.useState(false)
-  const [error, setError] = React.useState(null)
+  const [error, setError] = React.useState<string | null>(null)
   const [selectedSchoolForTutors, setSelectedSchoolForTutors] = React.useState<string>("");
   const [selectedSchoolForStudents, setSelectedSchoolForStudents] = React.useState<string>("");
   const [selectedTutorForStudents, setSelectedTutorForStudents] = React.useState<string>("");
 
-  const tutorForm = useForm({
+  console.log(students);
+
+  const tutorForm = useForm<z.infer<typeof tutorFormSchema>>({
     resolver: zodResolver(tutorFormSchema),
     defaultValues: {
       name: "",
@@ -92,7 +98,7 @@ export default function AdminDashboard() {
     },
   })
 
-  const onTutorSubmit = async (data) => {
+  const onTutorSubmit = async (data: z.infer<typeof tutorFormSchema>) => {
     try {
       setLoading(true)
       // Add your API call here
@@ -100,7 +106,7 @@ export default function AdminDashboard() {
       // Reset form on success
       tutorForm.reset()
     } catch (err) {
-      setError(err.message)
+      setError(err instanceof Error ? err.message : "An unknown error occurred")
     } finally {
       setLoading(false)
     }
@@ -118,22 +124,22 @@ export default function AdminDashboard() {
 //   }
 
   // Add these functions inside your AdminDashboard component
-  const navigateToSchool = (schoolId: string) => {
+  const navigateToSchool = (schoolId: string | number) => {
     // Implement navigation to school details
     console.log('Navigating to school:', schoolId)
   }
 
-  const handleEditSchool = (schoolId: string) => {
+  const handleEditSchool = (schoolId: string | number) => {
     // Implement school editing
     console.log('Editing school:', schoolId)
   }
 
-  const handleManageTutors = (schoolId: string) => {
+  const handleManageTutors = (schoolId: string | number) => {
     // Implement tutor management for school
     console.log('Managing tutors for school:', schoolId)
   }
 
-  const handleDeleteSchool = (schoolId: string) => {
+  const handleDeleteSchool = (schoolId: string | number) => {
     // Implement school deletion
     console.log('Deleting school:', schoolId)
   }
@@ -154,7 +160,7 @@ export default function AdminDashboard() {
           const data = await response.json();
           setTutors(data);
         } catch (err) {
-          setError(err.message);
+          setError(err instanceof Error ? err.message : "An unknown error occurred");
         } finally {
           setLoading(false);
         }
@@ -177,7 +183,7 @@ export default function AdminDashboard() {
           const data = await response.json();
           setStudents(data);
         } catch (err) {
-          setError(err.message);
+          setError(err instanceof Error ? err.message : "An unknown error occurred");
         } finally {
           setLoading(false);
         }
@@ -349,7 +355,7 @@ export default function AdminDashboard() {
                           </FormControl>
                           <SelectContent>
                             {schools.map((school) => (
-                              <SelectItem key={school.id} value={school.id}>
+                              <SelectItem key={school.id} value={school.id.toString()}>
                                 {school.name}
                               </SelectItem>
                             ))}
@@ -455,7 +461,7 @@ export default function AdminDashboard() {
                         <Badge variant="outline">{school.trEnrollment}%</Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={school.status === 'active' ? 'success' : 'secondary'}>
+                        <Badge variant={school.status === 'active' ? 'default' : 'secondary'}>
                           {school.status}
                         </Badge>
                       </TableCell>
@@ -530,7 +536,7 @@ export default function AdminDashboard() {
                       <TableCell>Lead Tutor</TableCell>
                       <TableCell>15</TableCell>
                       <TableCell>
-                        <Badge variant="success">Active</Badge>
+                        <Badge variant="default">Active</Badge>
                       </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
@@ -625,7 +631,7 @@ export default function AdminDashboard() {
                         <Badge variant="outline">+2.3 years</Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="success">Active</Badge>
+                        <Badge variant="default">Active</Badge>
                       </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
