@@ -23,12 +23,12 @@ import Link from "next/link"
 const starATestOptions = [
     {
         title: "WRA",
-        url: "/wra",
+        url: "/assessment/wra",
         icon: FileText,
     },
     {
         title: "SSCA Section 1",
-        url: "#",
+        url: "/assessment/ssca-section1",
         icon: FileText,
     },
     {
@@ -186,4 +186,3 @@ export function AppSidebar() {
         </>
     )
 }
-
