@@ -1,7 +1,6 @@
 import { Button } from '@/components/ui/button'
-import { DialogHeader } from '@/components/ui/dialog'
-import { Dialog, DialogTrigger, DialogContent, DialogTitle } from '@radix-ui/react-dialog'
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@radix-ui/react-select'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import React from 'react'
 
 export function ManageTutors() {
