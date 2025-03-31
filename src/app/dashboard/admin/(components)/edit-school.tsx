@@ -1,7 +1,8 @@
+"use client"
+
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { PlusCircle } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import * as z from 'zod'
@@ -15,6 +16,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+import { School } from '@prisma/client'
 
 const schoolFormSchema = z.object({
   name: z.string().min(2, "School name must be at least 2 characters"),
@@ -26,26 +28,32 @@ const schoolFormSchema = z.object({
 
 type SchoolFormValues = z.infer<typeof schoolFormSchema>
 
-export function AddNewSchool() {
-  const [open, setOpen] = useState(false)
+interface EditSchoolProps {
+  school: School
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onSuccess?: () => void
+}
+
+export function EditSchool({ school, open, onOpenChange, onSuccess }: EditSchoolProps) {
   const [loading, setLoading] = useState(false)
 
   const form = useForm<SchoolFormValues>({
     resolver: zodResolver(schoolFormSchema),
     defaultValues: {
-      name: "",
-      location: "",
-      address: "",
-      contactEmail: "",
-      phoneNumber: "",
+      name: school.name,
+      location: school.location,
+      address: school.address || "",
+      contactEmail: school.contactEmail || "",
+      phoneNumber: school.phoneNumber || "",
     },
   })
 
   async function onSubmit(data: SchoolFormValues) {
     try {
       setLoading(true)
-      const response = await fetch('/api/schools', {
-        method: 'POST',
+      const response = await fetch(`/api/schools/${school.id}`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -53,30 +61,25 @@ export function AddNewSchool() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to create school')
+        throw new Error('Failed to update school')
       }
 
-      toast.success('School created successfully')
-      setOpen(false)
-      form.reset()
+      toast.success('School updated successfully')
+      onOpenChange(false)
+      onSuccess?.()
     } catch (error) {
-      toast.error('Failed to create school')
-      console.error('Error creating school:', error)
+      toast.error('Failed to update school')
+      console.error('Error updating school:', error)
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" /> Add New School
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add New School</DialogTitle>
+          <DialogTitle>Edit School Details</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -87,7 +90,7 @@ export function AddNewSchool() {
                 <FormItem>
                   <FormLabel>School Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter school name" {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -100,7 +103,7 @@ export function AddNewSchool() {
                 <FormItem>
                   <FormLabel>Location</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter location" {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -113,7 +116,7 @@ export function AddNewSchool() {
                 <FormItem>
                   <FormLabel>Address</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter school address" {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -126,7 +129,7 @@ export function AddNewSchool() {
                 <FormItem>
                   <FormLabel>Contact Email</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="contact@school.com" {...field} />
+                    <Input type="email" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -139,19 +142,15 @@ export function AddNewSchool() {
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
                   <FormControl>
-                    <Input type="tel" placeholder="Phone number" {...field} />
+                    <Input type="tel" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <DialogFooter>
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={loading}
-              >
-                {loading ? 'Creating...' : 'Create School'}
+              <Button type="submit" disabled={loading}>
+                {loading ? 'Saving...' : 'Save Changes'}
               </Button>
             </DialogFooter>
           </form>

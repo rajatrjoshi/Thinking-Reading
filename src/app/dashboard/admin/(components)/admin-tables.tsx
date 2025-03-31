@@ -12,6 +12,7 @@ import React, { useState, useEffect } from 'react';
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { EditSchool } from './edit-school';
 
 interface ExtendedSchool extends School {
     studentCount?: number;
@@ -30,76 +31,7 @@ interface SchoolsResponse {
     total: number;
 }
 
-const columns: ColumnDef<ExtendedSchool>[] = [
-    {
-        accessorKey: "name",
-        header: "School Name",
-        cell: ({ row }) => (
-            <Button
-                variant="link"
-                onClick={() => navigateToSchool(row.original.id)}
-            >
-                {row.getValue("name")}
-            </Button>
-        ),
-    },
-    {
-        accessorKey: "location",
-        header: "Location",
-    },
-    {
-        accessorKey: "studentCount",
-        header: "Students",
-    },
-    {
-        accessorKey: "tutorCount",
-        header: "Tutors",
-    },
-    {
-        accessorKey: "trEnrollment",
-        header: "TR Enrollment",
-        cell: ({ row }) => (
-            <Badge variant="outline">
-                {row.getValue("trEnrollment")}%
-            </Badge>
-        ),
-    },
-    {
-        accessorKey: "status",
-        header: "Status",
-        cell: ({ row }) => (
-            <Badge variant={row.getValue("status") === "active" ? "default" : "secondary"}>
-                {row.getValue("status")}
-            </Badge>
-        ),
-    },
-    {
-        id: "actions",
-        cell: ({ row }) => (
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                        <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => initiateDeleteSchool(row.original.id)}>
-                        <Edit className="mr-2 h-4 w-4" /> Edit Details
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleManageTutors(row.original.id)}>
-                        <UserCog className="mr-2 h-4 w-4" /> Manage Tutors
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                        className="text-red-600"
-                        onClick={() => handleDeleteSchool()}
-                    >
-                        <Trash className="mr-2 h-4 w-4" /> Delete School
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-        ),
-    },
-];
+
 
 export default function AdminTables() {
 
@@ -115,21 +47,11 @@ export default function AdminTables() {
     const [globalFilter, setGlobalFilter] = useState("");
     const [loading, setLoading] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
-    // const [schoolToDelete, setSchoolToDelete] = React.useState<number | null>(null);
     const [schoolToDelete] = React.useState<number | null>(null);
     const [selectedSchoolForTutors, setSelectedSchoolForTutors] = React.useState<string>("");
     const [selectedSchoolForStudents, setSelectedSchoolForStudents] = React.useState<string>("");
     const [selectedTutorForStudents, setSelectedTutorForStudents] = React.useState<string>("");
-
-    // function navigateToSchool(id: number): void {
-    //     console.log(id);
-    //     console.error('Function not implemented.');
-    // }
-
-    // function handleManageTutors(id: number): void {
-    //     console.log(id);
-    //     console.error('Function not implemented.');
-    // }
+    const [schoolToEdit, setSchoolToEdit] = useState<School | null>(null);
 
     function handleDeleteSchool(): void {
         if (schoolToDelete) {
@@ -138,38 +60,104 @@ export default function AdminTables() {
         }
     }
 
-    // function initiateDeleteSchool(id: number): void {
-    //     setSchoolToDelete(id);
-    //     setIsDeleteDialogOpen(true);
-    // }
+    const columns: ColumnDef<ExtendedSchool>[] = [
+        {
+            accessorKey: "name",
+            header: "School Name",
+            cell: ({ row }) => (
+                <Button
+                    variant="link"
+                    onClick={() => navigateToSchool(row.original.id)}
+                >
+                    {row.getValue("name")}
+                </Button>
+            ),
+        },
+        {
+            accessorKey: "location",
+            header: "Location",
+        },
+        {
+            accessorKey: "studentCount",
+            header: "Students",
+        },
+        {
+            accessorKey: "tutorCount",
+            header: "Tutors",
+        },
+        {
+            accessorKey: "trEnrollment",
+            header: "TR Enrollment",
+            cell: ({ row }) => (
+                <Badge variant="outline">
+                    {row.getValue("trEnrollment")}%
+                </Badge>
+            ),
+        },
+        {
+            accessorKey: "status",
+            header: "Status",
+            cell: ({ row }) => (
+                <Badge variant={row.getValue("status") === "active" ? "default" : "secondary"}>
+                    {row.getValue("status")}
+                </Badge>
+            ),
+        },
+        {
+            id: "actions",
+            cell: ({ row }) => (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <DropdownMenuItem onClick={() => setSchoolToEdit(row.original)}>
+                            <Edit className="mr-2 h-4 w-4" /> Edit Details
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleManageTutors(row.original.id)}>
+                            <UserCog className="mr-2 h-4 w-4" /> Manage Tutors
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            className="text-red-600"
+                            onClick={() => initiateDeleteSchool(row.original.id)}
+                        >
+                            <Trash className="mr-2 h-4 w-4" /> Delete School
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            ),
+        },
+    ];
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const searchQuery = new URLSearchParams({
+                page: (pageIndex + 1).toString(),
+                limit: pageSize.toString(),
+                search: globalFilter
+            });
+
+            const response = await fetch(`/api/schools?${searchQuery}`);
+            const json = await response.json();
+
+            setData(json);
+            if (json.pageCount > 0 && pageIndex >= json.pageCount) {
+                setPagination(prev => ({
+                    ...prev,
+                    pageIndex: 0
+                }));
+            }
+        } catch (error) {
+            console.error('Failed to fetch schools:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const searchQuery = new URLSearchParams({
-                    page: (pageIndex + 1).toString(),
-                    limit: pageSize.toString(),
-                    search: globalFilter
-                });
-
-                const response = await fetch(`/api/schools?${searchQuery}`);
-                const json = await response.json();
-
-                setData(json);
-                if (json.pageCount > 0 && pageIndex >= json.pageCount) {
-                    setPagination(prev => ({
-                        ...prev,
-                        pageIndex: 0
-                    }));
-                }
-            } catch (error) {
-                console.error('Failed to fetch schools:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchData();
     }, [pageIndex, pageSize, globalFilter]);
 
@@ -390,6 +378,18 @@ export default function AdminTables() {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+            {schoolToEdit && (
+                <EditSchool
+                    school={schoolToEdit}
+                    open={!!schoolToEdit}
+                    onOpenChange={(open) => !open && setSchoolToEdit(null)}
+                    onSuccess={() => {
+                        setSchoolToEdit(null);
+                        // Refresh the data
+                        fetchData();
+                    }}
+                />
+            )}
         </>
     );
 }
