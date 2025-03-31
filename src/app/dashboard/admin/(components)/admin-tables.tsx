@@ -5,11 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { School } from '@prisma/client';
 import { Edit, MoreHorizontal, Trash, TrendingUp, UserCog } from 'lucide-react';
-import React from 'react'
+import React, { useState, useEffect } from 'react';
+import { DataTable } from "@/components/ui/data-table";
+import { ColumnDef } from "@tanstack/react-table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface ExtendedSchool extends School {
     studentCount?: number;
@@ -17,32 +19,117 @@ interface ExtendedSchool extends School {
     trEnrollment?: number;
 }
 
-interface AdminTablesProps {
-    schools: ExtendedSchool[]
+interface PaginationState {
+    pageIndex: number;
+    pageSize: number;
 }
 
-export default function AdminTables({ schools }: AdminTablesProps) {
+interface SchoolsResponse {
+    schools: ExtendedSchool[];
+    pageCount: number;
+    total: number;
+}
+
+const columns: ColumnDef<ExtendedSchool>[] = [
+    {
+        accessorKey: "name",
+        header: "School Name",
+        cell: ({ row }) => (
+            <Button
+                variant="link"
+                onClick={() => navigateToSchool(row.original.id)}
+            >
+                {row.getValue("name")}
+            </Button>
+        ),
+    },
+    {
+        accessorKey: "location",
+        header: "Location",
+    },
+    {
+        accessorKey: "studentCount",
+        header: "Students",
+    },
+    {
+        accessorKey: "tutorCount",
+        header: "Tutors",
+    },
+    {
+        accessorKey: "trEnrollment",
+        header: "TR Enrollment",
+        cell: ({ row }) => (
+            <Badge variant="outline">
+                {row.getValue("trEnrollment")}%
+            </Badge>
+        ),
+    },
+    {
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ row }) => (
+            <Badge variant={row.getValue("status") === "active" ? "default" : "secondary"}>
+                {row.getValue("status")}
+            </Badge>
+        ),
+    },
+    {
+        id: "actions",
+        cell: ({ row }) => (
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                        <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                    <DropdownMenuItem onClick={() => initiateDeleteSchool(row.original.id)}>
+                        <Edit className="mr-2 h-4 w-4" /> Edit Details
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleManageTutors(row.original.id)}>
+                        <UserCog className="mr-2 h-4 w-4" /> Manage Tutors
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                        className="text-red-600"
+                        onClick={() => handleDeleteSchool()}
+                    >
+                        <Trash className="mr-2 h-4 w-4" /> Delete School
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        ),
+    },
+];
+
+export default function AdminTables() {
+
+    const [data, setData] = useState<SchoolsResponse>({
+        schools: [],
+        pageCount: 0,
+        total: 0
+    });
+    const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
+        pageIndex: 0,
+        pageSize: 10
+    });
+    const [globalFilter, setGlobalFilter] = useState("");
+    const [loading, setLoading] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
-    const [schoolToDelete, setSchoolToDelete] = React.useState<number | null>(null);
-    // const [loading, setLoading] = React.useState(false);
-    const [loading,] = React.useState(false);
+    // const [schoolToDelete, setSchoolToDelete] = React.useState<number | null>(null);
+    const [schoolToDelete] = React.useState<number | null>(null);
     const [selectedSchoolForTutors, setSelectedSchoolForTutors] = React.useState<string>("");
     const [selectedSchoolForStudents, setSelectedSchoolForStudents] = React.useState<string>("");
     const [selectedTutorForStudents, setSelectedTutorForStudents] = React.useState<string>("");
 
-    function navigateToSchool(id: number): void {
-        console.log(id)
-        console.error('Function not implemented.');
-    }
-
-    // function handleEditSchool(id: number): void {
+    // function navigateToSchool(id: number): void {
+    //     console.log(id);
     //     console.error('Function not implemented.');
     // }
 
-    function handleManageTutors(id: number): void {
-        console.log(id)
-        console.error('Function not implemented.');
-    }
+    // function handleManageTutors(id: number): void {
+    //     console.log(id);
+    //     console.error('Function not implemented.');
+    // }
 
     function handleDeleteSchool(): void {
         if (schoolToDelete) {
@@ -51,10 +138,40 @@ export default function AdminTables({ schools }: AdminTablesProps) {
         }
     }
 
-    function initiateDeleteSchool(id: number): void {
-        setSchoolToDelete(id);
-        setIsDeleteDialogOpen(true);
-    }
+    // function initiateDeleteSchool(id: number): void {
+    //     setSchoolToDelete(id);
+    //     setIsDeleteDialogOpen(true);
+    // }
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const searchQuery = new URLSearchParams({
+                    page: (pageIndex + 1).toString(),
+                    limit: pageSize.toString(),
+                    search: globalFilter
+                });
+
+                const response = await fetch(`/api/schools?${searchQuery}`);
+                const json = await response.json();
+
+                setData(json);
+                if (json.pageCount > 0 && pageIndex >= json.pageCount) {
+                    setPagination(prev => ({
+                        ...prev,
+                        pageIndex: 0
+                    }));
+                }
+            } catch (error) {
+                console.error('Failed to fetch schools:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [pageIndex, pageSize, globalFilter]);
 
     return (
         <>
@@ -71,67 +188,20 @@ export default function AdminTables({ schools }: AdminTablesProps) {
                             <CardTitle>Registered Schools</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>School Name</TableHead>
-                                        <TableHead>Location</TableHead>
-                                        <TableHead>Students</TableHead>
-                                        <TableHead>Tutors</TableHead>
-                                        <TableHead>TR Enrollment</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {schools.map((school) => (
-                                        <TableRow key={school.id}>
-                                            <TableCell className="font-medium">
-                                                <Button variant="link" onClick={() => navigateToSchool(school.id)}>
-                                                    {school.name}
-                                                </Button>
-                                            </TableCell>
-                                            <TableCell>{school.location}</TableCell>
-                                            <TableCell>{school.studentCount}</TableCell>
-                                            <TableCell>{school.tutorCount}</TableCell>
-                                            <TableCell>
-                                                <Badge variant="outline">{school.trEnrollment}%</Badge>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Badge variant={school.status === 'active' ? 'default' : 'secondary'}>
-                                                    {school.status}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell>
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="sm">
-                                                            <MoreHorizontal className="h-4 w-4" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent>
-                                                        <DropdownMenuItem
-                                                            className="text-red-600"
-                                                            onClick={() => initiateDeleteSchool(school.id)}
-                                                        >
-                                                            <Edit className="mr-2 h-4 w-4" /> Edit Details
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem onClick={() => handleManageTutors(school.id)}>
-                                                            <UserCog className="mr-2 h-4 w-4" /> Manage Tutors
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem
-                                                            className="text-red-600"
-                                                            onClick={() => handleDeleteSchool()}
-                                                        >
-                                                            <Trash className="mr-2 h-4 w-4" /> Delete School
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+                            <DataTable
+                                columns={columns}
+                                data={data.schools}
+                                pageCount={data.pageCount}
+                                pagination={{
+                                    pageIndex,
+                                    pageSize,
+                                }}
+                                onPaginationChange={setPagination}
+                                onGlobalFilterChange={setGlobalFilter}
+                                globalFilter={globalFilter}
+                                loading={loading}
+                                searchKey="name"
+                            />
                         </CardContent>
                     </Card>
                 </TabsContent>
@@ -149,7 +219,7 @@ export default function AdminTables({ schools }: AdminTablesProps) {
                                         <SelectValue placeholder="Select a school to view tutors" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {schools.map((school) => (
+                                        {data.schools.map((school) => (
                                             <SelectItem key={school.id} value={school.id.toString()}>
                                                 {school.name}
                                             </SelectItem>
@@ -219,7 +289,7 @@ export default function AdminTables({ schools }: AdminTablesProps) {
                                             <SelectValue placeholder="Select a school" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {schools.map((school) => (
+                                            {data.schools.map((school) => (
                                                 <SelectItem key={school.id} value={school.id.toString()}>
                                                     {school.name}
                                                 </SelectItem>
