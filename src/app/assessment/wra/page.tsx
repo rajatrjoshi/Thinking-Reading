@@ -74,7 +74,7 @@ function TestView({ student, onBack }: { student: StudentList, onBack: () => voi
 
   return (
     <div className="">
-      <div className="pb-2 flex justify-between items-center">
+      <div className="pb-3 flex justify-between items-center">
         <h2 className="text-2xl font-bold">WRA Assessment</h2>
         <button 
           onClick={onBack}
@@ -122,7 +122,7 @@ function TestView({ student, onBack }: { student: StudentList, onBack: () => voi
             </Table>
             
             {/* Scrollable body */}
-            <div className="max-h-[500px] overflow-y-auto bg-white">
+            <div className="max-h-[480px] overflow-y-auto bg-white">
               <Table>
                 <TableBody>
                   {words.map((word) => (
@@ -192,7 +192,7 @@ function TestView({ student, onBack }: { student: StudentList, onBack: () => voi
             <TooltipTrigger asChild>
               <span>
                 <button
-                  className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-[var(--color-tertiary)] text-white rounded-md hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={!allWordsAssessed}
                   onClick={() => {
                     // Logic to submit assessment results
@@ -260,7 +260,7 @@ export default function Wra() {
   }
 
   return (
-    <div className="w-full p-3">
+    <div className="w-full pt-8 p-3">
       {testStarted && selectedStudent ? (
         <TestView student={selectedStudent} onBack={handleBackToSelection} />
       ) : (
