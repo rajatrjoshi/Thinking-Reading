@@ -12,14 +12,15 @@ const updateSchoolSchema = z.object({
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const body = await req.json()
+    const { id } = await params;
     const validatedData = updateSchoolSchema.parse(body)
 
     const school = await prisma.school.update({
-      where: { id: parseInt(params.id) },
+      where: { id: parseInt(id) },
       data: validatedData,
       include: {
         _count: {
@@ -34,7 +35,7 @@ export async function PATCH(
     return NextResponse.json(school)
   } catch (error) {
     console.error("Failed to update school:", error)
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Invalid input", details: error.errors },
@@ -51,11 +52,12 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await prisma.school.delete({
-      where: { id: parseInt(params.id) },
+      where: { id: parseInt(id) },
     });
 
     return NextResponse.json({ success: true });

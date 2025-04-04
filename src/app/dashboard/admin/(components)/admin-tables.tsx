@@ -95,7 +95,7 @@ export default function AdminTables() {
             cell: ({ row }) => (
                 <Button
                     variant="link"
-                    onClick={() => navigateToSchool(row.original.id)}
+                    // onClick={() => navigateToSchool(row.original.id)}
                 >
                     {row.getValue("name")}
                 </Button>
@@ -216,7 +216,7 @@ export default function AdminTables() {
                                 onGlobalFilterChange={setGlobalFilter}
                                 globalFilter={globalFilter}
                                 loading={loading}
-                                searchKey="name"
+                                // searchKey="name"
                             />
                         </CardContent>
                     </Card>
@@ -324,11 +324,11 @@ export default function AdminTables() {
                                                 <SelectValue placeholder="Select a tutor" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {tutors.map((tutor) => (
+                                                {/* {tutors.map((tutor) => (
                                                     <SelectItem key={tutor.id} value={tutor.id.toString()}>
                                                         {tutor.name}
                                                     </SelectItem>
-                                                ))}
+                                                ))} */}
                                             </SelectContent>
                                         </Select>
                                     </div>

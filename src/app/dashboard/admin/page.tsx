@@ -21,24 +21,28 @@ export default async function AdminDashboard() {
         <StatCard
           title="Total Schools"
           // value={schools.length}
+          value={10}
           icon={School}
           subtitle="Active schools in program"
         />
         <StatCard
           title="Active Tutors"
           // value={totalTutors}
+          value={100}
           icon={Users}
           subtitle="Across all schools"
         />
         <StatCard
           title="TR Program Students"
           // value={totalStudents}
+          value={1000}
           icon={BookOpen}
           subtitle="Total enrolled students"
         />
         <StatCard
           title="Program Enrollment"
           // value={`${avgEnrollment}%`}
+          value={40}
           icon={TrendingUp}
           subtitle="Average across schools"
         />
