@@ -7,12 +7,13 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { School } from '@prisma/client';
-import { Edit, MoreHorizontal, Trash, TrendingUp, UserCog } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import { Edit, MoreHorizontal, Trash, TrendingUp } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { EditSchool } from './edit-school';
+import { toast } from 'sonner';
 
 interface ExtendedSchool extends School {
     studentCount?: number;
@@ -47,16 +48,43 @@ export default function AdminTables() {
     const [globalFilter, setGlobalFilter] = useState("");
     const [loading, setLoading] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
-    const [schoolToDelete] = React.useState<number | null>(null);
+    const [schoolToDelete, setSchoolToDelete] = React.useState<number | null>(null);
     const [selectedSchoolForTutors, setSelectedSchoolForTutors] = React.useState<string>("");
     const [selectedSchoolForStudents, setSelectedSchoolForStudents] = React.useState<string>("");
     const [selectedTutorForStudents, setSelectedTutorForStudents] = React.useState<string>("");
     const [schoolToEdit, setSchoolToEdit] = useState<School | null>(null);
 
-    function handleDeleteSchool(): void {
-        if (schoolToDelete) {
-            console.error('Function not implemented.');
+    async function handleDeleteSchool(): Promise<void> {
+        if (!schoolToDelete) {
+            toast.info('Nothing to delete');
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const response = await fetch(`/api/schools/${schoolToDelete}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete school');
+            }
+
+            // Update local state to remove the deleted school
+            setData(prev => ({
+                ...prev,
+                schools: prev.schools.filter(school => school.id !== schoolToDelete),
+                total: prev.total - 1
+            }));
+
+            toast.success('School deleted successfully');
+        } catch (error) {
+            console.error('Failed to delete school:', error);
+            toast.error('Failed to delete school');
+        } finally {
+            setLoading(false);
             setIsDeleteDialogOpen(false);
+            setSchoolToDelete(null);
         }
     }
 
@@ -116,12 +144,12 @@ export default function AdminTables() {
                         <DropdownMenuItem onClick={() => setSchoolToEdit(row.original)}>
                             <Edit className="mr-2 h-4 w-4" /> Edit Details
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleManageTutors(row.original.id)}>
-                            <UserCog className="mr-2 h-4 w-4" /> Manage Tutors
-                        </DropdownMenuItem>
                         <DropdownMenuItem
                             className="text-red-600"
-                            onClick={() => initiateDeleteSchool(row.original.id)}
+                            onClick={() => {
+                                setSchoolToDelete(row.original.id);
+                                setIsDeleteDialogOpen(true);
+                            }}
                         >
                             <Trash className="mr-2 h-4 w-4" /> Delete School
                         </DropdownMenuItem>
@@ -131,7 +159,7 @@ export default function AdminTables() {
         },
     ];
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         setLoading(true);
         try {
             const searchQuery = new URLSearchParams({
@@ -155,11 +183,11 @@ export default function AdminTables() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [pageIndex, pageSize, globalFilter]);
 
     useEffect(() => {
         fetchData();
-    }, [pageIndex, pageSize, globalFilter]);
+    }, [pageIndex, pageSize, globalFilter, fetchData]);
 
     return (
         <>
@@ -371,8 +399,7 @@ export default function AdminTables() {
                         <AlertDialogAction
                             onClick={handleDeleteSchool}
                             disabled={loading}
-                            className="bg-red-600 hover:bg-red-700"
-                        >
+                            className="bg-red-600 hover:bg-red-700">
                             {loading ? 'Deleting...' : 'Delete School'}
                         </AlertDialogAction>
                     </AlertDialogFooter>

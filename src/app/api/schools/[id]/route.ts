@@ -48,3 +48,22 @@ export async function PATCH(
     )
   }
 }
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    await prisma.school.delete({
+      where: { id: parseInt(params.id) },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Failed to delete school:", error);
+    return NextResponse.json(
+      { error: "Failed to delete school" },
+      { status: 500 }
+    );
+  }
+}
