@@ -390,7 +390,7 @@ export const columns: ColumnDef<StudentList>[] = [
     cell: ({ row }) => (
       <div className="flex items-center justify-center">
         <div 
-          className={`h-4 w-4 rounded-full border ${row.getIsSelected() ? 'bg-primary border-primary' : 'border-primary'}`}
+          className={`h-4 w-4 rounded-full border ${row.getIsSelected() ? 'border-[var(--color-tertiary)] border-4' : 'border-primary'}`}
           aria-label={row.getIsSelected() ? "Selected" : "Select"}
         />
       </div>
@@ -499,12 +499,12 @@ export default function SelectStudent({ onStartTest }: SelectStudentProps) {
     setSelectedRowId(rowId);
     
     // Store the selected student in session storage
-    try {
-      const selectedStudent = table.getRow(rowId).original;
-      sessionStorage.setItem(SELECTED_STUDENT_KEY, JSON.stringify(selectedStudent));
-    } catch (error) {
-      console.error("Error storing selected student in session storage:", error);
-    }
+    // try {
+    //   const selectedStudent = table.getRow(rowId).original;
+    //   sessionStorage.setItem(SELECTED_STUDENT_KEY, JSON.stringify(selectedStudent));
+    // } catch (error) {
+    //   console.error("Error storing selected student in session storage:", error);
+    // }
   };
 
   // Convert the selectedRowId to the format expected by the table
@@ -536,7 +536,7 @@ export default function SelectStudent({ onStartTest }: SelectStudentProps) {
     table.getRow(selectedRowId).original : null;
 
   return (
-    <div className="w-full">
+    <div className="w-full pt-8">
       <div className="flex items-center py-4">
         <Input
           placeholder="Filter names..."
@@ -627,6 +627,7 @@ export default function SelectStudent({ onStartTest }: SelectStudentProps) {
       </div>
       <div className="flex items-center justify-end pt-4">
         <Button 
+          className="hover:bg-[var(--color-tertiary)] hover:opacity-75 bg-[var(--color-tertiary)]"
           disabled={!selectedRowId}
           onClick={() => {
             if (selectedStudent && onStartTest) {
