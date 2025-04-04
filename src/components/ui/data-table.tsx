@@ -28,7 +28,7 @@ interface DataTableProps<TData, TValue> {
     pageIndex: number
     pageSize: number
   }
-  onPaginationChange: (pagination: PaginationState) => void
+  onPaginationChange: (updater: PaginationState | ((state: PaginationState) => PaginationState)) => void
   onGlobalFilterChange: (value: string) => void
   globalFilter: string
   loading?: boolean
