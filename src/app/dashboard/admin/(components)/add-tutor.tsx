@@ -35,6 +35,12 @@ const tutorFormSchema = z.object({
     school: z.string().min(1, "Please select a school"),
 })
 
+const OPTIONS = [
+    { value: "slt", label: "School Leader" },
+    { value: "lt", label: "Team Leader" },
+    { value: "tutor", label: "General Tutor" }
+]
+
 export function AddTutor() {
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null)
@@ -162,9 +168,11 @@ export function AddTutor() {
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="admin">Admin</SelectItem>
-                                            <SelectItem value="slt">SLT</SelectItem>
-                                            <SelectItem value="tutor">General Tutor</SelectItem>
+                                            {OPTIONS.map((option) => (
+                                                <SelectItem key={option.value} value={option.value}>
+                                                    {option.label}
+                                                </SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />

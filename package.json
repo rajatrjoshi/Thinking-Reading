@@ -3,15 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "preinstall": "node check-npm-version.mjs",
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "node check-npm-version.mjs && prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "prepare": "husky",
     "debug": "node --inspect-brk node_modules/next/dist/bin/next dev"
   },
   "prisma": {
-    "seed": "node --loader ts-node/esm prisma/seed.ts"
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
   },
   "dependencies": {
     "@faker-js/faker": "^9.6.0",

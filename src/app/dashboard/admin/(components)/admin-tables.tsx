@@ -7,13 +7,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { School } from '@prisma/client';
-import { Edit, MoreHorizontal, Trash, TrendingUp } from 'lucide-react';
+import { Check, ChevronsUpDown, Edit, MoreHorizontal, Trash, TrendingUp } from 'lucide-react';
 import React, { useState, useEffect, useCallback } from 'react';
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { EditSchool } from './edit-school';
 import { toast } from 'sonner';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
+import { cn } from '@/lib/utils';
 
 interface ExtendedSchool extends School {
     studentCount?: number;
@@ -95,7 +98,7 @@ export default function AdminTables() {
             cell: ({ row }) => (
                 <Button
                     variant="link"
-                    // onClick={() => navigateToSchool(row.original.id)}
+                // onClick={() => navigateToSchool(row.original.id)}
                 >
                     {row.getValue("name")}
                 </Button>
@@ -216,7 +219,7 @@ export default function AdminTables() {
                                 onGlobalFilterChange={setGlobalFilter}
                                 globalFilter={globalFilter}
                                 loading={loading}
-                                // searchKey="name"
+                            // searchKey="name"
                             />
                         </CardContent>
                     </Card>
@@ -227,21 +230,46 @@ export default function AdminTables() {
                         <CardHeader>
                             <CardTitle>Tutor Management</CardTitle>
                             <div className="mt-4 max-w-md">
-                                <Select
-                                    value={selectedSchoolForTutors}
-                                    onValueChange={setSelectedSchoolForTutors}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select a school to view tutors" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {data.schools.map((school) => (
-                                            <SelectItem key={school.id} value={school.id.toString()}>
-                                                {school.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            role="combobox"
+                                            className="w-full justify-between"
+                                        >
+                                            {data.schools.find((school) => school.id.toString() === selectedSchoolForTutors)
+                                                ?.name ?? "Select a school"}
+                                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-full p-0">
+                                        <Command>
+                                            <CommandInput placeholder="Search schools..." />
+                                            <CommandEmpty>No schools found.</CommandEmpty>
+                                            <CommandGroup>
+                                                {data.schools.map((school) => (
+                                                    <CommandItem
+                                                        key={school.id}
+                                                        value={school.id.toString()}
+                                                        onSelect={(value) => {
+                                                            setSelectedSchoolForTutors(value)
+                                                        }}
+                                                    >
+                                                        <Check
+                                                            className={cn(
+                                                                "mr-2 h-4 w-4",
+                                                                selectedSchoolForTutors === school.id.toString()
+                                                                    ? "opacity-100"
+                                                                    : "opacity-0"
+                                                            )}
+                                                        />
+                                                        {school.name}
+                                                    </CommandItem>
+                                                ))}
+                                            </CommandGroup>
+                                        </Command>
+                                    </PopoverContent>
+                                </Popover>
                             </div>
                         </CardHeader>
                         <CardContent>
